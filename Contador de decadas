@@ -1,0 +1,93 @@
+//Universidad del valle de Guatemala
+//BE3029-Electronica Digital II
+//Javier Ochoa - 23758
+//Mcu: ESP32 dev kit
+//Laboratorio #2
+
+//Librerias
+#include <Arduino.h>
+#include <stdint.h>
+
+// Pines de LEDs
+#define LED_a 16     
+#define LED_b 4     
+#define LED_r 15    
+#define LED_az 2
+
+#define BTN1 19      
+#define BTN2 18      
+
+// el contador empieza a contar, en este caso iria de 0 a 3 porque son 4 leds)
+int contando = 0;  
+
+// antirrebote para los dos botones (HIGH y LOW por sus respectivas configuraciones)
+bool estadoAnteriorBTN1 = LOW;
+bool estadoAnteriorBTN2 = HIGH;
+unsigned long tiempoAnteriorBTN1 = 0; 
+unsigned long tiempoAnteriorBTN2 = 0;
+const unsigned long retardoAntirrebote = 50; //tiempo de antirrebote para que no lea diferentes pulsaciones
+
+
+void mostrarLED(int pos);
+
+void setup() {
+  // Configurar LEDs como salidas
+  pinMode(LED_a, OUTPUT);
+  pinMode(LED_b, OUTPUT);
+  pinMode(LED_az, OUTPUT);
+  pinMode(LED_r, OUTPUT);
+
+  // Configurar botones como entradas
+  pinMode(BTN1, INPUT_PULLDOWN);  
+  pinMode(BTN2, INPUT_PULLUP);    
+
+  // Encender el LED correspondiente a la posición inicial
+  mostrarLED(contando);
+}
+
+void loop() {
+  unsigned long tiempo = millis(); // guardar el tiempo actual, que nos va servir para el antirrebote
+
+  // Leer el botón 1 
+  bool estadoActualBTN1 = digitalRead(BTN1);
+  if (estadoActualBTN1 == HIGH && estadoAnteriorBTN1 == LOW && (tiempo - tiempoAnteriorBTN1 > retardoAntirrebote)) {
+    contando = (contando + 1) % 4;      
+    mostrarLED(contando);               
+    tiempoAnteriorBTN1 = tiempo;
+  }
+  estadoAnteriorBTN1 = estadoActualBTN1;
+
+  // Leer el botón 2 
+  bool estadoActualBTN2 = digitalRead(BTN2);
+  if (estadoActualBTN2 == LOW && estadoAnteriorBTN2 == HIGH && (tiempo - tiempoAnteriorBTN2 > retardoAntirrebote)) {
+    contando = (contando - 1 + 4) % 4;  
+    mostrarLED(contando);             
+    tiempoAnteriorBTN2 = tiempo;
+  }
+  estadoAnteriorBTN2 = estadoActualBTN2; //guarda el estado actual del botón y usarlo en la próxima vuelta del loop() para comparar si el botón cambió de estado o no
+}
+
+// Función que apaga todos los LEDs y enciende solo uno según la posición
+void mostrarLED(int pos) {
+  // Apagar todos
+  digitalWrite(LED_a, LOW);
+  digitalWrite(LED_b, LOW);
+  digitalWrite(LED_az, LOW);
+  digitalWrite(LED_r, LOW);
+
+  // Encender solo el que es
+  switch (pos) {
+    case 0:
+      digitalWrite(LED_a, HIGH);
+      break;
+    case 1:
+      digitalWrite(LED_b, HIGH);
+      break;
+    case 2:
+      digitalWrite(LED_az, HIGH);
+      break;
+    case 3:
+      digitalWrite(LED_r, HIGH);
+      break;
+  }
+}
