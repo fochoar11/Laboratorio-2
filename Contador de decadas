@@ -5,6 +5,7 @@
 //Laboratorio #2
 
 //Librerias
+
 #include <Arduino.h>
 #include <stdint.h>
 
@@ -15,15 +16,16 @@
 #define LED_az 2
 
 // Pines de botones
-#define BTN1 19    // Avanzar (pull-down)
+#define BTN1 19   // Avanzar (pull-down)
 #define BTN2 18    // Retroceder (pull-up)
-
-// lo cambie para que inicie en -1 para que no se encienda ningún LED al principio
+#define BTN3 21
+// Contador, inicia en -1 para que no se encienda ningún LED al principio
 int contando = -1;
 
 // Variables para antirrebote
 bool estadoAnteriorBTN1 = LOW;
 bool estadoAnteriorBTN2 = HIGH;
+bool estadoAnteriorBTN3 = HIGH;
 unsigned long tiempoAnteriorBTN1 = 0;
 unsigned long tiempoAnteriorBTN2 = 0;
 const unsigned long retardoAntirrebote = 100; // milisegundos
@@ -40,7 +42,7 @@ void setup() {
   // Configurar botones como entradas con resistencias internas
   pinMode(BTN1, INPUT_PULLDOWN);  // Avanzar
   pinMode(BTN2, INPUT_PULLUP);    // Retroceder
-
+  pinMode(BTN3, INPUT);
   // Al inicio, todos los LEDs están apagados
   mostrarLED(contando);
 }
@@ -51,7 +53,7 @@ void loop() {
   // Leer botón 1 (avanzar)
   bool estadoActualBTN1 = digitalRead(BTN1);
   if (estadoActualBTN1 != estadoAnteriorBTN1 && estadoActualBTN1 == HIGH && (tiempo - tiempoAnteriorBTN1 > retardoAntirrebote)) {
-    contando = (contando + 1) % 4;  // Avanza de 0 a 3 porque son 4 leds
+    contando = (contando + 1) % 4;  // Avanza de 0 a 3
     mostrarLED(contando);
     tiempoAnteriorBTN1 = tiempo;
   }
@@ -66,7 +68,7 @@ void loop() {
   }
   estadoAnteriorBTN2 = estadoActualBTN2;
 
-  delay(10);  // Pequeño delay para estabilidad porque se me estaban cambiando de la nada las leds
+  delay(10);  // Pequeño delay para estabilidad
 }
 
 // Función que apaga todos los LEDs y enciende solo uno según la posición
@@ -83,6 +85,8 @@ void mostrarLED(int pos) {
     case 1: digitalWrite(LED_b, HIGH); break;
     case 2: digitalWrite(LED_az, HIGH); break;
     case 3: digitalWrite(LED_r, HIGH); break;
-    default: break; // Si es -1 o inválido, no se enciende nada
+    default: break; // es para que si es -1 o inválido, no se enciende nada
   }
 }
+
+
